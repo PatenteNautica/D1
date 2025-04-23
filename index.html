@@ -1,0 +1,172 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+  <meta charset="UTF-8">
+  <title>Simulazione Esame Patente Nautica</title>
+  <style>
+    body { font-family: sans-serif; margin: 40px; max-width: 800px; }
+    .question { margin-bottom: 20px; display: none; }
+    .answers label { display: block; margin-bottom: 5px; cursor: pointer; }
+    .correct { background-color: #d4edda; }
+    .wrong { background-color: #f8d7da; }
+    #timer { font-weight: bold; font-size: 18px; margin-bottom: 20px; color: #d9534f; }
+    #navigation { margin-top: 20px; }
+    #results { margin-top: 20px; font-weight: bold; }
+    img { max-width: 100%; margin-top: 10px; }
+    button { margin-right: 10px; }
+  </style>
+</head>
+<body>
+  <h1>Simulazione Esame Patente Nautica D1</h1>
+  <div id="timer"></div>
+  <form id="quiz-form"></form>
+  <div id="navigation">
+    <button type="button" id="prevBtn">Indietro</button>
+    <button type="button" id="nextBtn">Avanti</button>
+    <button type="button" id="submitBtn" onclick="showResults()">Concludi</button>
+  </div>
+  <div id="results"></div>
+
+  <script>
+    const fullDataset = [
+      {
+        "domanda": "Com'è denominata la massima lunghezza dell'unità navale, cioè quella misurata tra le estremità prodiera e poppiera?",
+        "risposte": [
+          { "testo": "lunghezza tra le perpendicolari.", "corretta": false },
+          { "testo": "lunghezza al galleggiamento.", "corretta": false },
+          { "testo": "lunghezza fuori tutto.", "corretta": true }
+        ],
+        "tema": "TEORIA DELLO SCAFO"
+      },
+      {
+        "domanda": "Quale funzione svolge la sentina di un'unità navale?",
+        "risposte": [
+          { "testo": "contenere il carburante.", "corretta": false },
+          { "testo": "contenere le acque sporche e i residui liquidi.", "corretta": true },
+          { "testo": "contenere le acque dolci.", "corretta": false }
+        ],
+        "tema": "TEORIA DELLO SCAFO"
+      },
+      {
+        "domanda": "La pressione dell'olio motore deve essere:",
+        "risposte": [
+          { "testo": "alta all'avviamento, poi tendere a zero.", "corretta": false },
+          { "testo": "sempre zero in marcia.", "corretta": false },
+          { "testo": "compresa nel range prescritto dal costruttore.", "corretta": true }
+        ],
+        "tema": "MOTORE"
+      },
+      {
+        "domanda": "Come si chiama il documento che certifica l'idoneità dell'unità a navigare?",
+        "risposte": [
+          { "testo": "certificato di sicurezza.", "corretta": true },
+          { "testo": "patente nautica.", "corretta": false },
+          { "testo": "certificato di proprietà.", "corretta": false }
+        ],
+        "tema": "NORMATIVA E DIPORTISTICA AMBIENTALE"
+      }
+    ];
+    const temiRichiesti = {
+      "TEORIA DELLO SCAFO": 1,
+      "MOTORE": 2,
+      "SICUREZZA": 3,
+      "MANOVRA E CONDOTTA": 2,
+      "COLREG E SEGNALAMENTO MARITTIMO": 2,
+      "METEOROLOGIA": 1,
+      "NAVIGAZIONE": 1,
+      "NORMATIVA E DIPORTISTICA AMBIENTALE": 3
+    };
+
+    let quizData = [];
+    let currentQuestion = 0;
+
+    function shuffle(array) {
+      for (let i = array.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [array[i], array[j]] = [array[j], array[i]];
+      }
+    }
+
+    function generateQuiz() {
+      let grouped = {};
+      fullDataset.forEach(q => {
+        if (!grouped[q.tema]) grouped[q.tema] = [];
+        grouped[q.tema].push(q);
+      });
+
+      Object.entries(temiRichiesti).forEach(([tema, count]) => {
+        if (grouped[tema]) {
+          shuffle(grouped[tema]);
+          quizData.push(...grouped[tema].slice(0, count));
+        }
+      });
+      shuffle(quizData);
+    }
+
+    function renderQuiz() {
+      const form = document.getElementById("quiz-form");
+      quizData.forEach((q, index) => {
+        const div = document.createElement("div");
+        div.className = "question";
+        div.id = `question-${index}`;
+        div.style.display = "none";
+
+        let html = `<p><strong>Domanda ${index + 1}:</strong> ${q.domanda}</p>`;
+        if (q.immagine) {
+          html += `<img src="immagini/${q.immagine}" alt="Domanda ${index + 1}">`;
+        }
+        q.risposte.forEach((a, i) => {
+          html += `<label><input type="radio" name="q${index}" value="${a.corretta}"> ${a.testo}</label>`;
+        });
+
+        div.innerHTML = html;
+        form.appendChild(div);
+      });
+      showQuestion(0);
+    }
+
+    function showQuestion(index) {
+      document.querySelectorAll(".question").forEach(q => q.style.display = "none");
+      const current = document.getElementById(`question-${index}`);
+      if (current) current.style.display = "block";
+      document.getElementById("prevBtn").disabled = index === 0;
+      document.getElementById("nextBtn").disabled = index === quizData.length - 1;
+      document.getElementById("submitBtn").style.display = index === quizData.length - 1 ? 'inline' : 'none';
+      currentQuestion = index;
+    }
+
+    document.getElementById("prevBtn").onclick = () => showQuestion(currentQuestion - 1);
+    document.getElementById("nextBtn").onclick = () => showQuestion(currentQuestion + 1);
+
+    function showResults() {
+      let score = 0;
+      quizData.forEach((q, index) => {
+        const selected = document.querySelector(`input[name='q${index}']:checked`);
+        if (selected && selected.value === "true") score++;
+      });
+      document.getElementById("results").textContent = `Hai risposto correttamente a ${score} su ${quizData.length} domande.`;
+      localStorage.setItem("quizPatenteNauticaScore", score);
+    }
+
+    function startTimer(duration) {
+      let timer = duration, minutes, seconds;
+      const display = document.getElementById("timer");
+      const interval = setInterval(() => {
+        minutes = Math.floor(timer / 60);
+        seconds = timer % 60;
+        display.textContent = `Tempo rimanente: ${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
+        if (--timer < 0) {
+          clearInterval(interval);
+          showResults();
+        }
+      }, 1000);
+    }
+
+    window.onload = () => {
+      generateQuiz();
+      renderQuiz();
+      startTimer(20 * 60);
+    };
+  </script>
+</body>
+</html>
