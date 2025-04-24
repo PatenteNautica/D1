@@ -812,7 +812,7 @@ potenza del motore (o il certificato d’uso motore)?", answers: ["si, tutte le 
 { question: "Nelle aree marine protette in zona B (riserva generale):", answers: ['sono vietate le immersioni subacquee.', 'è consentita la navigazione a remi e a vela.', 'vige il divieto di accesso per qualsiasi tipo di unità.'], correct: 1 },
 { question: "I contenitori di plastica abbandonata in mare:", answers: ['perdurano anche fino a 450 anni.', 'perdurano anche per 10 anni.', 'perdurano anche per 5 anni.'], correct: 0 },
 { question: "Nelle aree marine protette dove l'ormeggio è regolamentato tramite campi boe:", answers: ["nei campi boe l'ancoraggio è consentito dall'alba al tramonto.", "nei campi boe l'ancoraggio è consentito solo se c'è sufficiente spazio di manovra.", "nei campi boe l'ancoraggio non è mai consentito."], correct: 2 },
-    ],
+    ]
 };
 
 let selectedQuestions = [];
