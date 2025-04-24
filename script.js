@@ -1,3 +1,4 @@
+
 // Domande organizzate per tema
 const questions = {
     "Nomenclatura dello scafo": [
@@ -812,7 +813,9 @@ potenza del motore (o il certificato d’uso motore)?", answers: ["si, tutte le 
 { question: "Nelle aree marine protette in zona B (riserva generale):", answers: ['sono vietate le immersioni subacquee.', 'è consentita la navigazione a remi e a vela.', 'vige il divieto di accesso per qualsiasi tipo di unità.'], correct: 1 },
 { question: "I contenitori di plastica abbandonata in mare:", answers: ['perdurano anche fino a 450 anni.', 'perdurano anche per 10 anni.', 'perdurano anche per 5 anni.'], correct: 0 },
 { question: "Nelle aree marine protette dove l'ormeggio è regolamentato tramite campi boe:", answers: ["nei campi boe l'ancoraggio è consentito dall'alba al tramonto.", "nei campi boe l'ancoraggio è consentito solo se c'è sufficiente spazio di manovra.", "nei campi boe l'ancoraggio non è mai consentito."], correct: 2 },
-    ]
+        // altre domande relative a questo tema
+    ],
+    // altre categorie di domande come manovre, meteorologia, ecc.
 };
 
 let selectedQuestions = [];
@@ -836,13 +839,15 @@ function getRandomQuestions() {
     const themes = Object.keys(questions);
     const selected = [];
     
-    // Seleziona tutte le domande disponibili da ogni tema
+    // Seleziona domande in modo casuale per ogni tema
     themes.forEach(theme => {
         const themeQuestions = questions[theme];
-        themeQuestions.forEach(question => selected.push({ theme, ...question }));
+        for (let i = 0; i < themeQuestions.length; i++) {
+            selected.push({ theme, ...themeQuestions[i] });
+        }
     });
 
-    // Mischia le domande e seleziona le prime 15
+    // Mischia le domande
     return selected.sort(() => Math.random() - 0.5).slice(0, 15);
 }
 
@@ -891,4 +896,3 @@ window.onload = function() {
 
     document.getElementById('submitBtn').addEventListener('click', checkAnswers);
 };
-
